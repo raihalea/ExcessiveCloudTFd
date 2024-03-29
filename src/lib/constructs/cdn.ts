@@ -77,7 +77,6 @@ export class Cdn extends Construct {
       },
     );
 
-    // prettier-ignore
     const albOrigin = new HttpOrigin(`${domainConfig.ALB_HOSTNAME}.${domainConfig.DOMAIN_NAME}`);
     const s3Origin = new S3Origin(bucketWithAccessKey.bucket);
     const basicAuth = new BasicAuth(this, 'BasicAuth');
@@ -96,7 +95,6 @@ export class Cdn extends Construct {
       ],
     });
 
-    // prettier-ignore
     this.distribution = new Distribution(this, 'CloudFront', {
       defaultBehavior: {
         origin: albOrigin,

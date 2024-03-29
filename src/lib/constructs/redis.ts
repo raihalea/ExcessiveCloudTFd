@@ -23,7 +23,6 @@ export class Redis extends Construct {
 
     const { vpc } = props;
 
-    // prettier-ignore
     this.redisSG = new NoOutboundTrafficSecurityGroup(
       this, 'RedisSecurityGroup', { vpc },
     );

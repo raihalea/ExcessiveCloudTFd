@@ -25,8 +25,6 @@ export class Mail extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-
-    // TODO: smtpアクセスキーの作成
     const smtp = new SmtpCredentialsGenerator(this, 'SMTP');
     this.smtpAccessKey = smtp.smtpAccessKey;
     this.smtpSecretAccessKey = smtp.smtpSecretAccessKey;

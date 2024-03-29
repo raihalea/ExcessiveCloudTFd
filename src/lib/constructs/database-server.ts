@@ -22,10 +22,8 @@ export class Database extends Construct {
 
     const { vpc } = props;
 
-    // prettier-ignore
     this.DB_USERNAME = databaseConfig.DB_USER;
 
-    // prettier-ignore
     const dbClusterSecurityGroup = new NoOutboundTrafficSecurityGroup(
       this, 'DbSecurityGroup', { vpc },
     );
