@@ -1,23 +1,19 @@
-import { App, Stack, StackProps } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-
-export class MyStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps = {}) {
-    super(scope, id, props);
-
-    // define resources here...
-  }
-}
-
-// for development, use account/region from cdk cli
-const devEnv = {
-  account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION,
-};
+import { App } from 'aws-cdk-lib';
+import { CloudTFdStack } from './lib/cloudtfd-stack';
+import { awsConfig, globalConfig } from './lib/config/config';
+import { GlobalStack } from './lib/global-stack';
 
 const app = new App();
+const ctfd = new CloudTFdStack(app, 'CloudTFdStack', {
+  env: awsConfig,
+  crossRegionReferences: true,
+});
 
-new MyStack(app, 'CloudTFd-dev', { env: devEnv });
-// new MyStack(app, 'CloudTFd-prod', { env: prodEnv });
+new GlobalStack(app, 'GlobalStack', {
+  env: globalConfig,
+  crossRegionReferences: true,
+  bucketWithAccessKey: ctfd.bucketWithAccessKey,
+  cloudfrontPublicKey: ctfd.cloudfrontPublicKey,
+});
 
 app.synth();

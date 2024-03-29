@@ -1,11 +1,25 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { MyStack } from '../src/main';
+import { CloudTFdStack } from '../src/lib/cloudtfd-stack';
+import { awsConfig, globalConfig } from '../src/lib/config/config';
+import { GlobalStack } from '../src/lib/global-stack';
+
 
 test('Snapshot', () => {
   const app = new App();
-  const stack = new MyStack(app, 'test');
+  const ctfdStack = new CloudTFdStack(app, 'CloudTFdStack', {
+    env: awsConfig,
+    crossRegionReferences: true,
+  });
 
-  const template = Template.fromStack(stack);
-  expect(template.toJSON()).toMatchSnapshot();
+  const globalStack = new GlobalStack(app, 'GlobalStack', {
+    env: globalConfig,
+    crossRegionReferences: true,
+    bucketWithAccessKey: ctfdStack.bucketWithAccessKey,
+    cloudfrontPublicKey: ctfdStack.cloudfrontPublicKey,
+  });
+  const ctfd_template = Template.fromStack(ctfdStack);
+  const globalStack_template = Template.fromStack(globalStack);
+  expect(ctfd_template.toJSON()).toMatchSnapshot();
+  expect(globalStack_template.toJSON()).toMatchSnapshot();
 });

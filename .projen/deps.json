@@ -1,6 +1,10 @@
 {
   "dependencies": [
     {
+      "name": "@types/aws-lambda",
+      "type": "build"
+    },
+    {
       "name": "@types/jest",
       "type": "build"
     },
@@ -21,7 +25,7 @@
     },
     {
       "name": "aws-cdk",
-      "version": "^2.1.0",
+      "version": "^2.116.0",
       "type": "build"
     },
     {
@@ -67,8 +71,16 @@
       "type": "build"
     },
     {
+      "name": "@aws-cdk/aws-redshift-alpha",
+      "type": "runtime"
+    },
+    {
       "name": "aws-cdk-lib",
-      "version": "^2.1.0",
+      "version": "^2.116.0",
+      "type": "runtime"
+    },
+    {
+      "name": "cdk-monitoring-constructs",
       "type": "runtime"
     },
     {
