@@ -1,4 +1,4 @@
-import { awscdk, typescript } from 'projen';
+import { awscdk, typescript, python } from 'projen';
 const cdkProject = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.116.0',
   defaultReleaseBranch: 'main',
@@ -17,11 +17,12 @@ const cdkProject = new awscdk.AwsCdkTypeScriptApp({
   devDeps: ['@types/aws-lambda'],
 });
 
-const lambdaTS = new typescript.TypeScriptProject({
+
+const cloudfrontKeypair = new typescript.TypeScriptProject({
   defaultReleaseBranch: 'main',
-  name: 'lambdaTS',
+  name: 'cloudfrontKeypair',
   parent: cdkProject,
-  outdir: './src/lib/lambda/typescript',
+  outdir: './src/lib/lambda/cloudfront_keypair',
   deps: [
     '@aws-sdk/client-lambda',
     '@aws-sdk/client-ssm',
@@ -32,5 +33,19 @@ const lambdaTS = new typescript.TypeScriptProject({
   ],
 });
 
+const smtpCredentialsGenerate = new python.PythonProject({
+  name: 'smtp_credentials_generate',
+  parent: cdkProject,
+  outdir: './src/lib/lambda/smtp_credentials_generate',
+  moduleName: 'smtp_credentials_generate',
+  authorName: 'raiha',
+  authorEmail: 'raiha@example.com',
+  version: '0.1.0',
+  devDeps: [
+    'moto@^5.0.0',
+  ],
+});
+
 cdkProject.synth();
-lambdaTS.synth();
+smtpCredentialsGenerate.synth();
+cloudfrontKeypair.synth();

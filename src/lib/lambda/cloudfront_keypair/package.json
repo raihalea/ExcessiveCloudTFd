@@ -1,5 +1,5 @@
 {
-  "name": "lambdaTS",
+  "name": "cloudfrontKeypair",
   "scripts": {
     "build": "npx projen build",
     "compile": "npx projen compile",

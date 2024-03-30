@@ -48,7 +48,7 @@ export class CloudFrontKeyPairGenerator extends Construct {
       this,
       'CloudFrontKeyPairGenerator',
       {
-        entry: './src/lib/lambda/typescript/src/cloudfront_keypair/lambda_function.ts',
+        entry: './src/lib/lambda/cloudfront_keypair/src/lambda_function.ts',
         depsLockFilePath: './package-lock.json',
         handler: 'handler',
         runtime: Runtime.NODEJS_18_X,

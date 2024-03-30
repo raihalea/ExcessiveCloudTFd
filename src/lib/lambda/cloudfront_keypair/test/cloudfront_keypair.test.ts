@@ -1,6 +1,6 @@
 import { generateKeyPairSync } from 'crypto';
 import { Context, CdkCustomResourceResponse } from 'aws-lambda';
-import { handler } from '../src/cloudfront_keypair/lambda_function';
+import { handler } from '../src/lambda_function';
 
 
 function generatePrivateKeyPEM() {
