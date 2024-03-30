@@ -1,5 +1,5 @@
-import { awscdk } from 'projen';
-const project = new awscdk.AwsCdkTypeScriptApp({
+import { awscdk, typescript } from 'projen';
+const cdkProject = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.116.0',
   defaultReleaseBranch: 'main',
   name: 'CloudTFd',
@@ -16,4 +16,21 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   ],
   devDeps: ['@types/aws-lambda'],
 });
-project.synth();
+
+const lambdaTS = new typescript.TypeScriptProject({
+  defaultReleaseBranch: 'main',
+  name: 'lambdaTS',
+  parent: cdkProject,
+  outdir: './src/lib/lambda/typescript',
+  deps: [
+    '@aws-sdk/client-lambda',
+    '@aws-sdk/client-ssm',
+    '@types/aws-lambda',
+  ],
+  devDeps: [
+    '@types/node',
+  ],
+});
+
+cdkProject.synth();
+lambdaTS.synth();

@@ -1,11 +1,8 @@
 import { CustomResource, Duration, Names } from 'aws-cdk-lib';
 import { PublicKey } from 'aws-cdk-lib/aws-cloudfront';
 import { KeyPair, KeyPairType, KeyPairFormat } from 'aws-cdk-lib/aws-ec2';
-import {
-  Architecture,
-  DockerImageCode,
-  DockerImageFunction,
-} from 'aws-cdk-lib/aws-lambda';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StringParameter, IStringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -32,12 +29,29 @@ export class CloudFrontKeyPairGenerator extends Construct {
       parameterName: parameterName,
     });
 
-    const onEvent = new DockerImageFunction(
+    // const onEvent = new DockerImageFunction(
+    //   this,
+    //   'CloudFrontKeyPairGenerator',
+    //   {
+    //     architecture: Architecture.ARM_64,
+    //     code: DockerImageCode.fromImageAsset('./src/lib/lambda/cloudfront_keypair'),
+    //     environment: {
+    //       PRIVATEKEY_PARAMETER: this.privateKeyParameter.parameterName,
+    //       PUBLICKEY_PARAMETER: publicKeyParamter.parameterName,
+    //     },
+    //     timeout: Duration.seconds(30),
+    //     logRetention: RetentionDays.ONE_DAY,
+    //   },
+    // );
+
+    const onEvent = new NodejsFunction(
       this,
       'CloudFrontKeyPairGenerator',
       {
-        architecture: Architecture.ARM_64,
-        code: DockerImageCode.fromImageAsset('./src/lib/lambda/cloudfront_keypair'),
+        entry: './src/lib/lambda/typescript/src/cloudfront_keypair/lambda_function.ts',
+        depsLockFilePath: './package-lock.json',
+        handler: 'handler',
+        runtime: Runtime.NODEJS_18_X,
         environment: {
           PRIVATEKEY_PARAMETER: this.privateKeyParameter.parameterName,
           PUBLICKEY_PARAMETER: publicKeyParamter.parameterName,
