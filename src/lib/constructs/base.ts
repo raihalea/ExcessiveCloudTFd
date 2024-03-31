@@ -16,7 +16,6 @@ export class Base extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    // prettier-ignore
     this.vpc = new Vpc(this, 'Vpc', { natGateways: 0, restrictDefaultSecurityGroup: true });
 
     this.vpc.addGatewayEndpoint('S3Endpoint', {
@@ -28,7 +27,6 @@ export class Base extends Construct {
       lookupSupportedAzs: true,
     });
 
-    // prettier-ignore
     const endpointOptionsForECS: {[name: string]: InterfaceVpcEndpointOptions} = {
       EcrEndpoint: {
         service: InterfaceVpcEndpointAwsService.ECR,
@@ -56,7 +54,6 @@ export class Base extends Construct {
       },
     };
 
-    // this.endpointsForECS: InterfaceVpcEndpoint[] = [];
     this.endpointsForECS = [];
     for (const [name, options] of Object.entries(endpointOptionsForECS)) {
       const endpoint = this.vpc.addInterfaceEndpoint(name, options);

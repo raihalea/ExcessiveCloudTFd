@@ -15,7 +15,7 @@ test('Snapshot', () => {
   const globalStack = new GlobalStack(app, 'GlobalStack', {
     env: globalConfig,
     crossRegionReferences: true,
-    bucketWithAccessKey: ctfdStack.bucketWithAccessKey,
+    contentsBucket: ctfdStack.contentsBucket,
     cloudfrontPublicKey: ctfdStack.cloudfrontPublicKey,
   });
   const ctfd_template = Template.fromStack(ctfdStack);

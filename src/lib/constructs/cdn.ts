@@ -1,4 +1,4 @@
-import { Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 import {
   PublicKey,
   KeyGroup,
@@ -20,12 +20,12 @@ import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Bucket, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BasicAuth } from './basic-auth';
-import { BucketWithAccessKey } from './bucket';
+import { AutoCleanupBucket } from './utils/default-bucket';
 import { Domain } from './utils/domain';
 import { domainConfig, basicAuthConfig } from '../config/config';
 
 export interface CdnProps {
-  readonly bucketWithAccessKey: BucketWithAccessKey;
+  readonly contentsBucket: Bucket;
   readonly webAclId?: string;
   readonly cloudfrontPublicKey: PublicKey;
 }
@@ -36,7 +36,7 @@ export class Cdn extends Construct {
   constructor(scope: Construct, id: string, props: CdnProps) {
     super(scope, id);
 
-    const { bucketWithAccessKey, webAclId, cloudfrontPublicKey } = props;
+    const { contentsBucket, webAclId, cloudfrontPublicKey } = props;
 
     const publicKey = PublicKey.fromPublicKeyId(
       this,
@@ -44,7 +44,7 @@ export class Cdn extends Construct {
       cloudfrontPublicKey.publicKeyId,
     );
 
-    new KeyGroup(this, 'MyKeyGroup', {
+    const keyGroup = new KeyGroup(this, 'MyKeyGroup', {
       items: [publicKey],
     });
 
@@ -78,21 +78,14 @@ export class Cdn extends Construct {
     );
 
     const albOrigin = new HttpOrigin(`${domainConfig.ALB_HOSTNAME}.${domainConfig.DOMAIN_NAME}`);
-    const s3Origin = new S3Origin(bucketWithAccessKey.bucket);
+    const s3Origin = new S3Origin(contentsBucket);
     const basicAuth = new BasicAuth(this, 'BasicAuth');
     const functionAssociations = basicAuthConfig.IsEnabled
       ? [basicAuth.functionAssociation]
       : [];
 
-    const logBucket = new Bucket(this, 'LogBucket', {
+    const logBucket = new AutoCleanupBucket(this, 'LogBucket', {
       objectOwnership: ObjectOwnership.BUCKET_OWNER_PREFERRED,
-      enforceSSL: true,
-      removalPolicy: RemovalPolicy.RETAIN,
-      lifecycleRules: [
-        {
-          expiration: Duration.days(7),
-        },
-      ],
     });
 
     this.distribution = new Distribution(this, 'CloudFront', {
@@ -146,7 +139,7 @@ export class Cdn extends Construct {
           originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
           compress: true,
           functionAssociations: functionAssociations,
-          // trustedKeyGroups:[keyGroup]
+          trustedKeyGroups: [keyGroup],
         },
       },
       domainNames: [ctfDomain.fqdn],

@@ -35,7 +35,7 @@ export class Mail extends Construct {
     });
 
     this.configurationSet = new ConfigurationSet(this, 'ConfigurationSet', {
-      // customTrackingRedirectDomain: domainConfig.DOMAIN_NAME,
+      customTrackingRedirectDomain: domainConfig.DOMAIN_NAME,
       suppressionReasons: SuppressionReasons.BOUNCES_AND_COMPLAINTS,
       tlsPolicy: ConfigurationSetTlsPolicy.REQUIRE,
       reputationMetrics: true,

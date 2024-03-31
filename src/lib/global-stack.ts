@@ -1,12 +1,12 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { PublicKey } from 'aws-cdk-lib/aws-cloudfront';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { BucketWithAccessKey } from './constructs/bucket';
 import { Cdn } from './constructs/cdn';
 import { Waf } from './constructs/waf';
 
 interface GlobalStackProps extends StackProps {
-  bucketWithAccessKey: BucketWithAccessKey;
+  contentsBucket: Bucket;
   cloudfrontPublicKey: PublicKey;
 }
 
@@ -14,11 +14,11 @@ export class GlobalStack extends Stack {
   constructor(scope: Construct, id: string, props: GlobalStackProps) {
     super(scope, id, props);
 
-    const { bucketWithAccessKey, cloudfrontPublicKey } = props;
+    const { contentsBucket, cloudfrontPublicKey } = props;
 
     const waf = new Waf(this, 'Waf');
     new Cdn(this, 'Cdn', {
-      bucketWithAccessKey: bucketWithAccessKey,
+      contentsBucket: contentsBucket,
       webAclId: waf.webAclId,
       cloudfrontPublicKey: cloudfrontPublicKey,
     });

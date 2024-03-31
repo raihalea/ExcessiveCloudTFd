@@ -8,14 +8,15 @@ import {
   AwsLogDriver,
 } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancedFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
-import { BucketWithAccessKey } from './bucket';
 import { Database } from './database';
 import { Mail } from './mail';
 import { Redis } from './redis';
 import { AwsManagedPrefixList } from './utils/aws-managed-prefix-list';
 import { CloudFrontKeyPairGenerator } from './utils/cloudfront-keypair-generator';
+import { AutoCleanupBucket } from './utils/default-bucket';
 import { NoOutboundTrafficSecurityGroup } from './utils/default-security-group';
 import { Domain } from './utils/domain';
 import { domainConfig, databaseConfig } from '../config/config';
@@ -23,7 +24,6 @@ import { domainConfig, databaseConfig } from '../config/config';
 
 export interface ApplicationPatternsProps {
   readonly vpc: IVpc;
-  readonly bucketWithAccessKey: BucketWithAccessKey;
   readonly endpointsForECS: InterfaceVpcEndpoint[];
   readonly smtpEndpoint: InterfaceVpcEndpoint;
   readonly database: Database;
@@ -35,19 +35,21 @@ export class ApplicationPatterns extends Construct {
   readonly loadBalancedFargateService: ApplicationLoadBalancedFargateService;
   readonly ctfdLogDriver: AwsLogDriver;
   readonly cloudfrontPublicKey: PublicKey;
+  readonly contentsBucket: Bucket;
 
   constructor(scope: Construct, id: string, props: ApplicationPatternsProps) {
     super(scope, id);
 
     const {
       vpc,
-      bucketWithAccessKey,
       endpointsForECS,
       smtpEndpoint,
       database,
       redis,
       mail,
     } = props;
+
+    this.contentsBucket = new AutoCleanupBucket(this, 'CTFdBucket');
 
     const albSecurityGroup = new NoOutboundTrafficSecurityGroup(
       this, 'AlbSecurityGroup', { vpc },
@@ -88,12 +90,11 @@ export class ApplicationPatterns extends Construct {
         }),
         environment: {
           WORKERS: '3',
-          UPLOAD_PROVIDER: 's3',
-          // UPLOAD_PROVIDER: "s3withcf",
-          AWS_S3_BUCKET: `${bucketWithAccessKey.bucket.bucketName}`,
+          // UPLOAD_PROVIDER: 's3',
+          UPLOAD_PROVIDER: 's3withcf',
+          AWS_S3_BUCKET: `${this.contentsBucket.bucketName}`,
           AWS_S3_REGION: `${Aws.REGION}`,
           AWS_S3_CUSTOM_DOMAIN: `${domainConfig.HOSTNAME}.${domainConfig.DOMAIN_NAME}`,
-          // AWS_S3_CUSTOM_PREFIX: "files/",
           AWS_S3_CUSTOM_PREFIX: 'files/s3/',
           AWS_CF_PUBLIC_KEY_ID: this.cloudfrontPublicKey.publicKeyId,
           DATABASE_USER: database.DB_USERNAME,
@@ -136,7 +137,7 @@ export class ApplicationPatterns extends Construct {
       securityGroups: [ecsSecurityGroup],
     });
 
-    bucketWithAccessKey.bucket.grantReadWrite(
+    this.contentsBucket.grantReadWrite(
       this.loadBalancedFargateService.service.taskDefinition.taskRole,
     );
 

@@ -12,7 +12,7 @@ const ctfd = new CloudTFdStack(app, 'CloudTFdStack', {
 new GlobalStack(app, 'GlobalStack', {
   env: globalConfig,
   crossRegionReferences: true,
-  bucketWithAccessKey: ctfd.bucketWithAccessKey,
+  contentsBucket: ctfd.contentsBucket,
   cloudfrontPublicKey: ctfd.cloudfrontPublicKey,
 });
 
