@@ -8,7 +8,7 @@ const cdkProject = new awscdk.AwsCdkTypeScriptApp({
   gitignore: [
     'cdk.context.json',
     'config.ts',
-    '/__snapshots__/',
+    'test/__snapshots__',
   ],
   deps: [
     'cdk-monitoring-constructs',
