@@ -32,6 +32,7 @@ jspm_packages/
 .cache
 cdk.context.json
 config.ts
+/__snapshots__/
 /test-reports/
 junit.xml
 /coverage/
