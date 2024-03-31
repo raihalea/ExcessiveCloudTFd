@@ -38,7 +38,7 @@ export const domainConfig:DomainConfig = {
 };
 
 export const basicAuthConfig = {
-  IsEnabled: true,
+  IsEnabled: false,
   USER: 'user',
   PASS: 'pass',
 };
