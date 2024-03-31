@@ -64,6 +64,14 @@
       "name": "compile",
       "description": "Only compile"
     },
+    "copy-plugins": {
+      "name": "copy-plugins",
+      "steps": [
+        {
+          "exec": "cp -r ./CTFd-Plugins/* ./CTFd/CTFd/plugins/"
+        }
+      ]
+    },
     "default": {
       "name": "default",
       "description": "Synthesize project files",
@@ -124,6 +132,25 @@
         }
       ]
     },
+    "initial-ctfd-repos": {
+      "name": "initial-ctfd-repos",
+      "steps": [
+        {
+          "name": "add-ctfd",
+          "exec": "git submodule add https://github.com/CTFd/CTFd.git CTFd",
+          "condition": "! git submodule status CTFd >/dev/null"
+        },
+        {
+          "name": "add-ctfd-cloudfornt-plugin",
+          "exec": "git submodule add https://github.com/raihalea/CTFd-CloudFront-signed-url.git CTFd-Plugins/cloudfront",
+          "condition": "! git submodule status CTFd-Plugins/cloudfront >/dev/null"
+        },
+        {
+          "name": "copy-plugins",
+          "spawn": "copy-plugins"
+        }
+      ]
+    },
     "install": {
       "name": "install",
       "description": "Install project dependencies and update lockfile (non-frozen)",
@@ -162,6 +189,14 @@
     "pre-compile": {
       "name": "pre-compile",
       "description": "Prepare the project for compilation"
+    },
+    "pull-submodules": {
+      "name": "pull-submodules",
+      "steps": [
+        {
+          "exec": "git submodule update --init --recursive"
+        }
+      ]
     },
     "synth": {
       "name": "synth",

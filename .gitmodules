@@ -1,3 +1,6 @@
 [submodule "CTFd"]
 	path = CTFd
 	url = https://github.com/raihalea/CTFd.git
+[submodule "CTFd-Plugins/cloudfront"]
+	path = CTFd-Plugins/cloudfront
+	url = https://github.com/raihalea/CTFd-CloudFront-signed-url.git
