@@ -45,11 +45,11 @@ export const basicAuthConfig = {
 
 interface WafConfig {
   isEnabled: boolean;
-  allowTrustedIpsRule: RuleEnableWithIpConfig;
-  sizeRestrictionRule: RuleEnableConfig;
-  blockNonSpecificIps: RuleEnableWithIpConfig;
-  geoMatchRule: RuleEnableConfig;
+  emergencyTrustedIpsRule: RuleEnableWithIpConfig;
   limitRequestsRule: RuleEnableConfig;
+  adminIpsRule: RuleEnableWithIpConfig;
+  blockNonSpecificIpsRule: RuleEnableWithIpConfig;
+  geoMatchRule: RuleEnableConfig;
   managedRules: RuleEnableConfig;
 }
 interface RuleEnableWithIpConfig extends RuleEnableConfig {
@@ -65,7 +65,17 @@ interface RuleEnableConfig {
 }
 export const wafConfig: WafConfig = {
   isEnabled: true,
-  allowTrustedIpsRule: {
+  emergencyTrustedIpsRule: {
+    isEnabled: false,
+    IPv4List: [
+      // "192.0.2.0/24",
+      // "198.51.100.0/24"
+    ],
+    IPv6List: [
+      // "2001:db8::/32",
+    ],
+  },
+  adminIpsRule: {
     isEnabled: true,
     IPv4List: [
       // "192.0.2.0/24",
@@ -75,10 +85,7 @@ export const wafConfig: WafConfig = {
       // "2001:db8::/32",
     ],
   },
-  sizeRestrictionRule: {
-    isEnabled: true,
-  },
-  blockNonSpecificIps: {
+  blockNonSpecificIpsRule: {
     isEnabled: true,
     IPv4List: [
       // "192.0.2.0/24",
