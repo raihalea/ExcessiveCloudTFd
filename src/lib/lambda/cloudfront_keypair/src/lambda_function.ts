@@ -76,6 +76,5 @@ export const handler: CdkCustomResourceHandler = async (event) => {
   } catch (error) {
     response = await sendResponse(event, 'Failed', physicalResourceId);
     throw error;
-    return response;
   }
 };

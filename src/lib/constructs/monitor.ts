@@ -138,8 +138,6 @@ export class Monitor extends Construct {
     // monitoring.monitorCloudFrontDistribution({
     //   distribution: cdn.distribution,
     // });
-    // .addMediumHeader("Waf")
-    // .monitorWebApplicationFirewallAclV2({acl: waf.wafAclCloudFront})
     monitoring.monitorRdsCluster({
       cluster: database.dbCluster,
       addCpuUsageAlarm: {
