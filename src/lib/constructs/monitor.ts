@@ -60,28 +60,28 @@ export class Monitor extends Construct {
       },
     });
 
-    const mfInfo = new MetricFilter(this, 'mfInfo', {
+    const mfInfo = new MetricFilter(this, 'MfInfo', {
       logGroup: ctfd.ctfdLogDriver.logGroup!,
       metricNamespace: 'CTFd/ECS/task/INFO',
       metricName: 'INFO',
       filterPattern: FilterPattern.anyTerm('INFO'),
     });
 
-    const mfWARNING = new MetricFilter(this, 'mfWARNING', {
+    const mfWarning = new MetricFilter(this, 'MfWarning', {
       logGroup: ctfd.ctfdLogDriver.logGroup!,
       metricNamespace: 'CTFd/ECS/task/WARNING',
       metricName: 'WARNING',
       filterPattern: FilterPattern.anyTerm('WARNING'),
     });
 
-    const mfError = new MetricFilter(this, 'mfERROR', {
+    const mfError = new MetricFilter(this, 'MfError', {
       logGroup: ctfd.ctfdLogDriver.logGroup!,
       metricNamespace: 'CTFd/ECS/task/ERROR',
       metricName: 'ERROR',
       filterPattern: FilterPattern.anyTerm('ERROR'),
     });
 
-    const mfCRITICALL = new MetricFilter(this, 'mfCRITICAL', {
+    const mfCritical = new MetricFilter(this, 'MfCritical', {
       logGroup: ctfd.ctfdLogDriver.logGroup!,
       metricNamespace: 'CTFd/ECS/task/CRITICAL',
       metricName: 'CRITICAL',
@@ -93,7 +93,7 @@ export class Monitor extends Construct {
       alarmFriendlyName: 'CTFd Log',
       metricGroups: [
         { title: 'Info', metrics: [mfInfo.metric()] },
-        { title: 'Warning', metrics: [mfWARNING.metric()] },
+        { title: 'Warning', metrics: [mfWarning.metric()] },
         {
           title: 'Error',
           metrics: [
@@ -117,7 +117,7 @@ export class Monitor extends Construct {
           title: 'Critical',
           metrics: [
             {
-              metric: mfCRITICALL.metric(),
+              metric: mfCritical.metric(),
               alarmFriendlyName: 'CTFd Critical',
               addAlarm: {
                 Critical: {
