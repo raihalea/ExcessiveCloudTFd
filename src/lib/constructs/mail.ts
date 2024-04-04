@@ -25,17 +25,13 @@ export class Mail extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const smtp = new SmtpCredentialsGenerator(this, 'SMTP');
-    this.smtpAccessKey = smtp.smtpAccessKey;
-    this.smtpSecretAccessKey = smtp.smtpSecretAccessKey;
-
     const mailDomain = `${domainConfig.MAIL}.${domainConfig.DOMAIN_NAME}`;
     const hostedZone = HostedZone.fromLookup(this, 'Domain', {
       domainName: domainConfig.DOMAIN_NAME,
     });
 
     this.configurationSet = new ConfigurationSet(this, 'ConfigurationSet', {
-      customTrackingRedirectDomain: domainConfig.DOMAIN_NAME,
+      // customTrackingRedirectDomain: domainConfig.DOMAIN_NAME,
       suppressionReasons: SuppressionReasons.BOUNCES_AND_COMPLAINTS,
       tlsPolicy: ConfigurationSetTlsPolicy.REQUIRE,
       reputationMetrics: true,
@@ -53,10 +49,14 @@ export class Mail extends Construct {
       ]),
     });
 
-    new EmailIdentity(this, 'Identity', {
+    const emailIdentity = new EmailIdentity(this, 'Identity', {
       identity: Identity.publicHostedZone(hostedZone),
       mailFromDomain: mailDomain,
       configurationSet: this.configurationSet,
     });
+
+    const smtp = new SmtpCredentialsGenerator(this, 'SMTP', { emailIdentity: emailIdentity });
+    this.smtpAccessKey = smtp.smtpAccessKey;
+    this.smtpSecretAccessKey = smtp.smtpSecretAccessKey;
   }
 }
