@@ -6,7 +6,6 @@ const cdkProject = new awscdk.AwsCdkTypeScriptApp({
   projenrcTs: true,
 
   gitignore: [
-    'cdk.context.json',
     'config.ts',
     'test/__snapshots__',
   ],

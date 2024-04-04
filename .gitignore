@@ -30,7 +30,6 @@ jspm_packages/
 *.tgz
 .yarn-integrity
 .cache
-cdk.context.json
 config.ts
 test/__snapshots__
 /test-reports/
