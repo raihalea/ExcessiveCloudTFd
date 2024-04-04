@@ -31,7 +31,7 @@ export class Monitor extends Construct {
     // const info = new Topic(this, 'Info');
     const notice = new Topic(this, 'Notice');
     const warn = new Topic(this, 'Warn');
-    const cretical = new Topic(this, 'Cretical');
+    const critical = new Topic(this, 'Critical');
 
     const monitoring = new MonitoringFacade(this, 'CTFdMonitor');
 
@@ -124,7 +124,7 @@ export class Monitor extends Construct {
                   threshold: 1,
                   comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
                   actionOverride: new SnsAlarmActionStrategy({
-                    onAlarmTopic: cretical,
+                    onAlarmTopic: critical,
                   }),
                   datapointsToAlarm: 1,
                 },
@@ -250,7 +250,7 @@ export class Monitor extends Construct {
                   threshold: 0.1,
                   comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
                   actionOverride: new SnsAlarmActionStrategy({
-                    onAlarmTopic: cretical,
+                    onAlarmTopic: critical,
                   }),
                 },
               },
@@ -270,7 +270,7 @@ export class Monitor extends Construct {
                   threshold: 5,
                   comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
                   actionOverride: new SnsAlarmActionStrategy({
-                    onAlarmTopic: cretical,
+                    onAlarmTopic: critical,
                   }),
                 },
               },
