@@ -151,6 +151,11 @@ export class ApplicationPatterns extends Construct {
         minCapacity: 1,
       });
 
+    scalableTarget.scaleOnRequestCount('RequestScaling', {
+      requestsPerTarget: 700,
+      targetGroup: this.loadBalancedFargateService.targetGroup,
+    });
+
     scalableTarget.scaleOnCpuUtilization('CpuScaling', {
       targetUtilizationPercent: 75,
       scaleInCooldown: Duration.minutes(10),
@@ -171,7 +176,6 @@ export class ApplicationPatterns extends Construct {
 
     smtpEndpoint.connections.allowFrom(ecsSecurityGroup, Port.tcp(587));
 
-    // prettier-ignore
     const s3PrefixList = new AwsManagedPrefixList( this, 'S3PrefixList',
       { name: `com.amazonaws.${Aws.REGION}.s3` },
     ).prefixList;
