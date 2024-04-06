@@ -2,6 +2,7 @@ import { CustomResource, Duration } from 'aws-cdk-lib';
 import {
   User,
   AccessKey,
+  // Effect, Policy, PolicyStatement,
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -53,10 +54,21 @@ export class SmtpCredentialsGenerator extends Construct {
     });
 
     this.smtpSecretAccessKey.grantWrite(onEvent);
-    this.smtpSecretAccessKey.grantRead(onEvent);
+
+    const now = new Date();
+    const threeHoursLater = new Date(now.getTime() + 0.5 * 60 * 60 * 1000);
+    this.smtpSecretAccessKey.grantRead(onEvent).principalStatements.forEach((statement) => {
+      statement.addConditions(
+        {
+          DateGreaterThan: { 'aws:CurrentTime': now.toISOString() },
+          DateLessThan: { 'aws:CurrentTime': threeHoursLater.toISOString() },
+        },
+      );
+    });
 
     const smtpSecretProvider = new Provider(this, 'SmtpSecretProvider', {
       onEventHandler: onEvent,
+      logRetention: RetentionDays.ONE_DAY,
     });
 
     new CustomResource(

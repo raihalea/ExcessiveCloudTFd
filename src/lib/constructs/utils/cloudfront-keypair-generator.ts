@@ -1,6 +1,7 @@
 import { CustomResource, Duration, Names } from 'aws-cdk-lib';
 import { PublicKey } from 'aws-cdk-lib/aws-cloudfront';
 import { KeyPair, KeyPairType, KeyPairFormat } from 'aws-cdk-lib/aws-ec2';
+// import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -29,21 +30,6 @@ export class CloudFrontKeyPairGenerator extends Construct {
       parameterName: parameterName,
     });
 
-    // const onEvent = new DockerImageFunction(
-    //   this,
-    //   'CloudFrontKeyPairGenerator',
-    //   {
-    //     architecture: Architecture.ARM_64,
-    //     code: DockerImageCode.fromImageAsset('./src/lib/lambda/cloudfront_keypair'),
-    //     environment: {
-    //       PRIVATEKEY_PARAMETER: this.privateKeyParameter.parameterName,
-    //       PUBLICKEY_PARAMETER: publicKeyParamter.parameterName,
-    //     },
-    //     timeout: Duration.seconds(30),
-    //     logRetention: RetentionDays.ONE_DAY,
-    //   },
-    // );
-
     const onEvent = new NodejsFunction(
       this,
       'CloudFrontKeyPairGenerator',
@@ -61,8 +47,18 @@ export class CloudFrontKeyPairGenerator extends Construct {
       },
     );
 
-    this.privateKeyParameter.grantRead(onEvent);
     publicKeyParamter.grantWrite(onEvent);
+
+    const now = new Date();
+    const threeHoursLater = new Date(now.getTime() + 0.5 * 60 * 60 * 1000);
+    this.privateKeyParameter.grantRead(onEvent).principalStatements.forEach((statement) => {
+      statement.addConditions(
+        {
+          DateGreaterThan: { 'aws:CurrentTime': now.toISOString() },
+          DateLessThan: { 'aws:CurrentTime': threeHoursLater.toISOString() },
+        },
+      );
+    });
 
     const cloudFrontKeyPairProvider = new Provider(
       this,
