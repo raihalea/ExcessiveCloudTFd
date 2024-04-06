@@ -50,7 +50,7 @@ export class CloudFrontKeyPairGenerator extends Construct {
     publicKeyParamter.grantWrite(onEvent);
 
     const now = new Date();
-    const threeHoursLater = new Date(now.getTime() + 0.5 * 60 * 60 * 1000);
+    const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
     this.privateKeyParameter.grantRead(onEvent).principalStatements.forEach((statement) => {
       statement.addConditions(
         {
