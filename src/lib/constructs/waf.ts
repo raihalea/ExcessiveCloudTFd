@@ -93,16 +93,13 @@ export class Waf extends Construct {
       logDestinationConfigs: [logGroup.logGroupArn],
     });
 
-    // if (wafConfig.isEnabled) {
     this.webAclId = this.wafAclCloudFront.attrArn;
-    // }
   }
 
-  // ルールのマージ
   private makeRules(ipSetsDict: WafIpSetsDict): CfnRuleGroup.RuleProperty[] {
     const rules: CfnRuleGroup.RuleProperty[] = [];
 
-    // 信頼できるIPアドレスのWAFバイパス(緊急用)
+    // bypass trusted ip
     if (wafConfig.emergencyTrustedIpsRule.isEnabled) {
       const emergencyAllowIpsRule = this.createRuleEmergencyAllowIps(
         rules.length,
@@ -111,13 +108,13 @@ export class Waf extends Construct {
       rules.push(emergencyAllowIpsRule);
     }
 
-    // レートベースの制限ルールの追加
+    // Rate based rule
     if (wafConfig.limitRequestsRule.isEnabled) {
       const limitRequestsRule = this.createRuleLimitRequests(rules.length);
       rules.push(limitRequestsRule);
     }
 
-    // サイズ制限のルール追加
+    // size restricted rule
     if (wafConfig.adminIpsRule.isEnabled) {
       const adminIpRule = this.createSizeRestrictionExcludedAdmin(
         rules.length,
@@ -126,7 +123,7 @@ export class Waf extends Construct {
       rules.push(adminIpRule);
     }
 
-    // IP制限ルールの追加
+    // ip block rule
     if (wafConfig.blockNonSpecificIpsRule.isEnabled) {
       const blockNonSpecificIpsRule = this.createRuleBlockNonSpecificIps(
         rules.length,
@@ -135,13 +132,12 @@ export class Waf extends Construct {
       rules.push(blockNonSpecificIpsRule);
     }
 
-    // Geo情報によるブロックルールの追加
+    // geo based rule
     if (wafConfig.geoMatchRule.isEnabled) {
       const geoMatchRule = this.createRuleGeoMatch(rules.length);
       rules.push(geoMatchRule);
     }
 
-    // マネージドルールの追加
     if (wafConfig.managedRules.isEnabled) {
       const managedRuleGroups = this.createManagedRules(rules.length);
       rules.push(...managedRuleGroups);
@@ -231,7 +227,6 @@ export class Waf extends Construct {
     priority: number,
     adminIpSetList: CfnIPSet[],
   ): CfnRuleGroup.RuleProperty {
-    // 管理用IP　（ファイルアップロード）
     const ipSetList = adminIpSetList;
 
     const urlConditons = WafStatements.or(
@@ -262,7 +257,7 @@ export class Waf extends Construct {
     );
   }
 
-  // マネージドルールの生成
+  // aws managed rules
   private createManagedRules(
     startPriorityNumber: number,
   ): CfnRuleGroup.RuleProperty[] {

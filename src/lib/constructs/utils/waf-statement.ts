@@ -211,17 +211,14 @@ export class WafStatements {
   }
 
   static ipv4v6Match(ipSets: CfnIPSet[]): CfnWebACL.StatementProperty {
-    // 有効なIPセットに対するステートメントを格納するための配列
     const ipStatements = ipSets
       .filter((ipSet) => ipSet && ipSet.addresses.length > 0)
       .map((ipSet) => this.matchIpList(ipSet));
 
-    // ステートメントがない場合、空のオブジェクトを返す
     if (ipStatements.length === 0) {
       throw new Error('Both IPv4List and IPv6List are empty or undefined.');
     }
 
-    // 複数のステートメントがある場合、orで結合
     return this.or(...ipStatements);
   }
 }
