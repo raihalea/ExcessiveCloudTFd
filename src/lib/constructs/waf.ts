@@ -114,7 +114,7 @@ export class Waf extends Construct {
       rules.push(limitRequestsRule);
     }
 
-    // size restricted rule
+    // allows requests from specific IPs to bypass size restrictions
     if (wafConfig.adminIpsRule.isEnabled) {
       const adminIpRule = this.createSizeRestrictionExcludedAdmin(
         rules.length,
