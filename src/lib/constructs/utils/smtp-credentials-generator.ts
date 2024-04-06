@@ -2,7 +2,6 @@ import { CustomResource, Duration } from 'aws-cdk-lib';
 import {
   User,
   AccessKey,
-  // Effect, Policy, PolicyStatement,
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';

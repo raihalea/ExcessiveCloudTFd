@@ -1,7 +1,6 @@
 import { CustomResource, Duration, Names } from 'aws-cdk-lib';
 import { PublicKey } from 'aws-cdk-lib/aws-cloudfront';
 import { KeyPair, KeyPairType, KeyPairFormat } from 'aws-cdk-lib/aws-ec2';
-// import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
