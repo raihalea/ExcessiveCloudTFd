@@ -19,7 +19,7 @@ import { CloudFrontKeyPairGenerator } from './utils/cloudfront-keypair-generator
 import { AutoCleanupBucket } from './utils/default-bucket';
 import { NoOutboundTrafficSecurityGroup } from './utils/default-security-group';
 import { Domain } from './utils/domain';
-import { domainConfig, databaseConfig } from '../config/config';
+import { domainConfig, databaseConfig, redisConfig } from '../config/config';
 
 
 export interface ApplicationPatternsProps {
@@ -193,7 +193,7 @@ export class ApplicationPatterns extends Construct {
 
     redis.redisSG.connections.allowFrom(
       this.loadBalancedFargateService.service,
-      Port.tcp(6379),
+      Port.tcp(redisConfig.DB_PORT),
       'Allow inbound Redis connection',
     );
 
