@@ -56,24 +56,21 @@ export const handler: CdkCustomResourceHandler = async (event) => {
 
   let response: CdkCustomResourceResponse;
   try {
-    const publicKey = await createPublicKeyPEM(privatekeyParameterName);
-
     switch (event.RequestType) {
       case 'Create':
-        response = await sendResponse(event, 'SUCCESS', physicalResourceId, publicKey);
-        break;
       case 'Update':
+        const publicKey = await createPublicKeyPEM(privatekeyParameterName);
         response = await sendResponse(event, 'SUCCESS', physicalResourceId, publicKey);
         break;
       case 'Delete':
         response = await sendResponse(event, 'SUCCESS', physicalResourceId);
         break;
       default:
-        response = await sendResponse(event, 'Failed', physicalResourceId);
         throw new Error(`Invalid RequestType: ${event}`);
     }
     return response;
   } catch (error) {
+    console.error(`Error handling custom resource event: ${error}`);
     response = await sendResponse(event, 'Failed', physicalResourceId);
     throw error;
   }
