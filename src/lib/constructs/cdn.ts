@@ -1,4 +1,4 @@
-import { Duration } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import {
   PublicKey,
   KeyGroup,
@@ -20,7 +20,6 @@ import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Bucket, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BasicAuth } from './basic-auth';
-import { AutoCleanupBucket } from './utils/default-bucket';
 import { Domain } from './utils/domain';
 import { domainConfig, basicAuthConfig } from '../config/config';
 
@@ -84,8 +83,15 @@ export class Cdn extends Construct {
       ? [basicAuth.functionAssociation]
       : [];
 
-    const logBucket = new AutoCleanupBucket(this, 'LogBucket', {
+    const logBucket = new Bucket(this, 'LogBucket', {
+      enforceSSL: true,
       objectOwnership: ObjectOwnership.BUCKET_OWNER_PREFERRED,
+      removalPolicy: RemovalPolicy.RETAIN,
+      lifecycleRules: [
+        {
+          expiration: Duration.days(7),
+        },
+      ],
     });
 
     this.distribution = new Distribution(this, 'CloudFront', {

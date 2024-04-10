@@ -17,7 +17,7 @@ import { wafConfig } from '../config/config';
 
 export interface WafIpSetsDict {
   trustedIpsList: WafIpSets;
-  adminIpSetList: WafIpSets;
+  adminIpsSetList: WafIpSets;
   blockNonSpecificIpsRule: WafIpSets;
 }
 
@@ -65,7 +65,7 @@ export class Waf extends Construct {
         ipv4List: wafConfig.emergencyTrustedIpsRule.IPv4List,
         ipv6List: wafConfig.emergencyTrustedIpsRule.IPv6List,
       }),
-      adminIpSetList: new WafIpSets(this, 'AdminIpSetList', {
+      adminIpsSetList: new WafIpSets(this, 'adminIpsSetList', {
         namePrefix: 'Admin',
         ipv4List: wafConfig.adminIpsRule.IPv4List,
         ipv6List: wafConfig.adminIpsRule.IPv6List,
@@ -96,10 +96,11 @@ export class Waf extends Construct {
     this.webAclId = this.wafAclCloudFront.attrArn;
   }
 
+
   private makeRules(ipSetsDict: WafIpSetsDict): CfnRuleGroup.RuleProperty[] {
     const rules: CfnRuleGroup.RuleProperty[] = [];
 
-    // bypass trusted ip
+    // Bypass Trusted IP
     if (wafConfig.emergencyTrustedIpsRule.isEnabled) {
       const emergencyAllowIpsRule = this.createRuleEmergencyAllowIps(
         rules.length,
@@ -108,7 +109,7 @@ export class Waf extends Construct {
       rules.push(emergencyAllowIpsRule);
     }
 
-    // Rate based rule
+    // Rate Based Rule
     if (wafConfig.limitRequestsRule.isEnabled) {
       const limitRequestsRule = this.createRuleLimitRequests(rules.length);
       rules.push(limitRequestsRule);
@@ -118,12 +119,12 @@ export class Waf extends Construct {
     if (wafConfig.adminIpsRule.isEnabled) {
       const adminIpRule = this.createSizeRestrictionExcludedAdmin(
         rules.length,
-        ipSetsDict.adminIpSetList.ipSetList,
+        ipSetsDict.adminIpsSetList.ipSetList,
       );
       rules.push(adminIpRule);
     }
 
-    // ip block rule
+    // IP Block Rule
     if (wafConfig.blockNonSpecificIpsRule.isEnabled) {
       const blockNonSpecificIpsRule = this.createRuleBlockNonSpecificIps(
         rules.length,
@@ -132,19 +133,20 @@ export class Waf extends Construct {
       rules.push(blockNonSpecificIpsRule);
     }
 
-    // geo based rule
+    // Geo Based Rule
     if (wafConfig.geoMatchRule.isEnabled) {
       const geoMatchRule = this.createRuleGeoMatch(rules.length);
       rules.push(geoMatchRule);
     }
 
+    // AWS ManagedRules
     if (wafConfig.managedRules.isEnabled) {
       const managedRuleGroups = this.createManagedRules(rules.length);
       rules.push(...managedRuleGroups);
 
       const XsslabelMatchRule = this.createXSSLabelMatch(
         rules.length,
-        ipSetsDict.adminIpSetList.ipSetList,
+        ipSetsDict.adminIpsSetList.ipSetList,
       );
       rules.push(XsslabelMatchRule);
     }
@@ -167,7 +169,7 @@ export class Waf extends Construct {
 
   private createSizeRestrictionExcludedAdmin(
     priority: number,
-    adminIpSetList: CfnIPSet[],
+    adminIpsSetList: CfnIPSet[],
   ): CfnRuleGroup.RuleProperty {
     const urlConditons = WafStatements.or(
       WafStatements.startsWithURL('/api/'),
@@ -175,12 +177,12 @@ export class Waf extends Construct {
     );
 
     let combinedConditions;
-    if (adminIpSetList.length === 0) {
+    if (adminIpsSetList.length === 0) {
       combinedConditions = urlConditons;
     } else {
       combinedConditions = WafStatements.and(
         urlConditons,
-        WafStatements.ipv4v6Match(adminIpSetList),
+        WafStatements.ipv4v6Match(adminIpsSetList),
       );
     }
 
@@ -225,9 +227,9 @@ export class Waf extends Construct {
 
   private createXSSLabelMatch(
     priority: number,
-    adminIpSetList: CfnIPSet[],
+    adminIpsSetList: CfnIPSet[],
   ): CfnRuleGroup.RuleProperty {
-    const ipSetList = adminIpSetList;
+    const ipSetList = adminIpsSetList;
 
     const urlConditons = WafStatements.or(
       WafStatements.startsWithURL('/api/'),

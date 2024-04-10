@@ -1,11 +1,14 @@
 import { Aws, Duration } from 'aws-cdk-lib';
 import { PublicKey } from 'aws-cdk-lib/aws-cloudfront';
 import { InterfaceVpcEndpoint, Peer, Port, IVpc } from 'aws-cdk-lib/aws-ec2';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import {
   Cluster,
   ContainerImage,
   Secret as EcsScret,
   AwsLogDriver,
+  CpuArchitecture,
+  OperatingSystemFamily,
 } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancedFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
@@ -86,7 +89,7 @@ export class ApplicationPatterns extends Construct {
       cpu: 512,
       taskImageOptions: {
         image: ContainerImage.fromAsset('./CTFd', {
-          // platform: Platform.LINUX_ARM64
+          platform: Platform.LINUX_ARM64,
         }),
         environment: {
           WORKERS: '3',
@@ -124,10 +127,10 @@ export class ApplicationPatterns extends Construct {
         containerPort: 8000,
         logDriver: this.ctfdLogDriver,
       },
-      // runtimePlatform: {
-      //   cpuArchitecture: CpuArchitecture.ARM64,
-      //   operatingSystemFamily: OperatingSystemFamily.LINUX,
-      // },
+      runtimePlatform: {
+        cpuArchitecture: CpuArchitecture.ARM64,
+        operatingSystemFamily: OperatingSystemFamily.LINUX,
+      },
       // enableExecuteCommand: true,
       openListener: false,
       listenerPort: 443,
