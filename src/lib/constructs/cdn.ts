@@ -94,6 +94,14 @@ export class Cdn extends Construct {
       ],
     });
 
+    const themeCachePolicy = new CachePolicy(this, 'ThemeCachePolicy', {
+      defaultTtl: Duration.hours(1),
+      minTtl: Duration.hours(1),
+      maxTtl: Duration.days(7),
+      enableAcceptEncodingBrotli: true,
+      enableAcceptEncodingGzip: true,
+    });
+
     this.distribution = new Distribution(this, 'CloudFront', {
       defaultBehavior: {
         origin: albOrigin,
@@ -108,8 +116,7 @@ export class Cdn extends Construct {
         'themes/*': {
           origin: albOrigin,
           viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: CachePolicy.CACHING_OPTIMIZED,
-          originRequestPolicy: allViewRequestPolicy,
+          cachePolicy: themeCachePolicy,
           compress: true,
         },
         'api/*': {
