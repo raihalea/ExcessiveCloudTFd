@@ -52,20 +52,6 @@ export class Cdn extends Construct {
       domain: domainConfig.DOMAIN_NAME,
     });
 
-    new CachePolicy(this, 'MyCachePolicy', {
-      defaultTtl: Duration.days(2),
-      minTtl: Duration.minutes(1),
-      maxTtl: Duration.days(10),
-      cookieBehavior: CacheCookieBehavior.none(),
-      headerBehavior: CacheHeaderBehavior.allowList(
-        'Host',
-        'CloudFront-Forwarded-Proto',
-      ),
-      queryStringBehavior: CacheQueryStringBehavior.none(),
-      enableAcceptEncodingGzip: true,
-      enableAcceptEncodingBrotli: true,
-    });
-
     const allViewRequestPolicy = new OriginRequestPolicy(
       this,
       'MyRequestPolicy',
@@ -98,6 +84,10 @@ export class Cdn extends Construct {
       defaultTtl: Duration.hours(1),
       minTtl: Duration.hours(1),
       maxTtl: Duration.days(7),
+      headerBehavior: CacheHeaderBehavior.allowList(
+        'Host',
+        'CloudFront-Forwarded-Proto',
+      ),
       enableAcceptEncodingBrotli: true,
       enableAcceptEncodingGzip: true,
     });
