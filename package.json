@@ -1,5 +1,9 @@
 {
   "name": "CloudTFd",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raihalea/ExcessiveCloudTFd.git"
+  },
   "scripts": {
     "build": "npx projen build",
     "bundle": "npx projen bundle",

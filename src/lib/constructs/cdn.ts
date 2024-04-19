@@ -2,9 +2,7 @@ import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import {
   PublicKey,
   KeyGroup,
-  CacheCookieBehavior,
   CacheHeaderBehavior,
-  CacheQueryStringBehavior,
   Distribution,
   AllowedMethods,
   ViewerProtocolPolicy,

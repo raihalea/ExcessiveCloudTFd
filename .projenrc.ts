@@ -3,6 +3,7 @@ const cdkProject = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.116.0',
   defaultReleaseBranch: 'main',
   name: 'CloudTFd',
+  repository: 'https://github.com/raihalea/ExcessiveCloudTFd.git',
   projenrcTs: true,
 
   gitignore: [
