@@ -31,6 +31,10 @@ cdkProject.addTask('initial-ctfd-repos', {
       condition: '! git submodule status CTFd-Plugins/cloudfront >/dev/null',
     },
     {
+      name: 'pull-submodules',
+      spawn: 'pull-submodules',
+    },
+    {
       name: 'copy-plugins',
       spawn: 'copy-plugins',
     },
