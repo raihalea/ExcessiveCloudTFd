@@ -12,8 +12,10 @@ const cdkProject = new awscdk.AwsCdkTypeScriptApp({
   ],
   deps: [
     'cdk-monitoring-constructs',
-    '@aws-cdk/aws-redshift-alpha',
+    '@aws-cdk/aws-redshift-alpha@^2.112.0-alpha.0',
     'constructs',
+    'cdk-nag',
+    'typescript@^5.3.3',
   ],
   devDeps: ['@types/aws-lambda'],
 });
@@ -61,6 +63,7 @@ const cloudfrontKeypair = new typescript.TypeScriptProject({
   ],
   devDeps: [
     '@types/node',
+    'typescript@^5.3.3',
   ],
 });
 

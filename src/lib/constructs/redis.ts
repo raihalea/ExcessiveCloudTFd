@@ -1,16 +1,17 @@
 import { SecretValue, Names } from 'aws-cdk-lib';
-import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import {
   CfnSubnetGroup,
   CfnReplicationGroup,
 } from 'aws-cdk-lib/aws-elasticache';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { Base } from './base';
 import { NoOutboundTrafficSecurityGroup } from './utils/default-security-group';
 import { redisConfig } from '../config/config';
 
 export interface RedisProps {
-  readonly vpc: IVpc;
+  readonly base: Base;
 }
 
 export class Redis extends Construct {
@@ -21,15 +22,15 @@ export class Redis extends Construct {
   constructor(scope: Construct, id: string, props: RedisProps) {
     super(scope, id);
 
-    const { vpc } = props;
+    const { base } = props;
 
     this.redisSG = new NoOutboundTrafficSecurityGroup(
-      this, 'RedisSecurityGroup', { vpc },
+      this, 'RedisSecurityGroup', { vpc: base.vpc },
     );
 
     const redisSubnetGroup = new CfnSubnetGroup(this, 'ClusterSubnetGroup', {
       cacheSubnetGroupName: `redis-subnet-group-${Names.uniqueId(scope)}`,
-      subnetIds: vpc.isolatedSubnets.map(({ subnetId }) => subnetId),
+      subnetIds: base.vpc.isolatedSubnets.map(({ subnetId }) => subnetId),
       description: `redis-subnet-group-${Names.uniqueId(scope)}`,
     });
 
@@ -62,5 +63,12 @@ export class Redis extends Construct {
       port: redisConfig.DB_PORT,
     });
     this.elasticache_redis.addDependency(redisSubnetGroup);
+
+    NagSuppressions.addResourceSuppressions(this.redisAuth, [
+      {
+        id: 'AwsSolutions-SMG4',
+        reason: 'Wait until SecretsManager is natively supported.',
+      },
+    ]);
   }
 }

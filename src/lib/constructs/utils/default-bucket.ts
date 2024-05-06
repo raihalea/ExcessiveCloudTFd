@@ -1,5 +1,6 @@
 import { RemovalPolicy, Duration } from 'aws-cdk-lib';
 import { Bucket, BucketProps } from 'aws-cdk-lib/aws-s3';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 
 export class AutoCleanupBucket extends Bucket {
@@ -15,5 +16,14 @@ export class AutoCleanupBucket extends Bucket {
         },
       ],
     });
+    NagSuppressions.addResourceSuppressions(
+      this,
+      [
+        {
+          id: 'AwsSolutions-S1',
+          reason: 'Not needed for this project.',
+        },
+      ],
+    );
   }
 }

@@ -1,4 +1,5 @@
-import { App } from 'aws-cdk-lib';
+import { App, Aspects } from 'aws-cdk-lib';
+import { AwsSolutionsChecks } from 'cdk-nag';
 import { CloudTFdStack } from './lib/cloudtfd-stack';
 import { awsConfig, globalConfig } from './lib/config/config';
 import { GlobalStack } from './lib/global-stack';
@@ -15,5 +16,7 @@ new GlobalStack(app, 'GlobalStack', {
   contentsBucket: ctfd.contentsBucket,
   cloudfrontPublicKey: ctfd.cloudfrontPublicKey,
 });
+
+Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
 app.synth();

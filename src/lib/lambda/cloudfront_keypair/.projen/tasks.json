@@ -76,7 +76,7 @@
           "exec": "mkdir -p dist/js"
         },
         {
-          "exec": "mv $(npm pack) dist/js/"
+          "exec": "npm pack --pack-destination dist/js"
         }
       ]
     },
@@ -122,13 +122,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@types/jest,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,typescript,@aws-sdk/client-lambda,@aws-sdk/client-ssm,@types/aws-lambda"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@types/jest,eslint-import-resolver-typescript,eslint-plugin-import,jest,ts-jest,typescript,@aws-sdk/client-lambda,@aws-sdk/client-ssm,@types/aws-lambda"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser constructs eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest typescript @aws-sdk/client-lambda @aws-sdk/client-ssm @types/aws-lambda"
+          "exec": "yarn upgrade @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit ts-jest typescript @aws-sdk/client-lambda @aws-sdk/client-ssm @types/aws-lambda"
         },
         {
           "exec": "npx projen"

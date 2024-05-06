@@ -1,6 +1,6 @@
 import { Aws, Duration } from 'aws-cdk-lib';
 import { PublicKey } from 'aws-cdk-lib/aws-cloudfront';
-import { InterfaceVpcEndpoint, Peer, Port, IVpc } from 'aws-cdk-lib/aws-ec2';
+import { Peer, Port } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import {
   Cluster,
@@ -13,7 +13,9 @@ import {
 import { ApplicationLoadBalancedFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { Base } from './base';
 import { Database } from './database';
 import { Mail } from './mail';
 import { Redis } from './redis';
@@ -26,9 +28,7 @@ import { domainConfig, databaseConfig, redisConfig } from '../config/config';
 
 
 export interface ApplicationPatternsProps {
-  readonly vpc: IVpc;
-  readonly endpointsForECS: InterfaceVpcEndpoint[];
-  readonly smtpEndpoint: InterfaceVpcEndpoint;
+  readonly base: Base;
   readonly database: Database;
   readonly redis: Redis;
   readonly mail: Mail;
@@ -44,9 +44,7 @@ export class ApplicationPatterns extends Construct {
     super(scope, id);
 
     const {
-      vpc,
-      endpointsForECS,
-      smtpEndpoint,
+      base,
       database,
       redis,
       mail,
@@ -55,11 +53,11 @@ export class ApplicationPatterns extends Construct {
     this.contentsBucket = new AutoCleanupBucket(this, 'CTFdBucket');
 
     const albSecurityGroup = new NoOutboundTrafficSecurityGroup(
-      this, 'AlbSecurityGroup', { vpc },
+      this, 'AlbSecurityGroup', { vpc: base.vpc },
     );
 
     const ecsSecurityGroup = new NoOutboundTrafficSecurityGroup(
-      this, 'EcsSecurityGroup', { vpc },
+      this, 'EcsSecurityGroup', { vpc: base.vpc },
     );
 
     const ctfdSecretKey = new Secret(this, 'CtfdSecretKey', {
@@ -79,7 +77,7 @@ export class ApplicationPatterns extends Construct {
     this.cloudfrontPublicKey = cloudfrontKeyPairGenerator.publicKey;
     const cloudfrontPrivateKeyParameter = cloudfrontKeyPairGenerator.privateKeyParameter;
 
-    const cluster = new Cluster(this, 'Cluster', { vpc });
+    const cluster = new Cluster(this, 'Cluster', { vpc: base.vpc, containerInsights: true });
 
     this.loadBalancedFargateService =
     new ApplicationLoadBalancedFargateService(this, 'Service', {
@@ -103,10 +101,11 @@ export class ApplicationPatterns extends Construct {
           DATABASE_USER: database.DB_USERNAME,
           DATABASE_HOST: database.dbCluster.clusterEndpoint.hostname,
           // DATABASE_HOST: database.dbCluster.dbInstanceEndpointAddress,
-          DATABASE_PORT: String(database.dbCluster.clusterEndpoint.port),
+          DATABASE_PORT: String(databaseConfig.DB_PORT),
           // DATABASE_PORT: database.dbCluster.dbInstanceEndpointPort,
           REDIS_PROTOCOL: 'rediss',
           REDIS_HOST: redis.elasticache_redis.attrPrimaryEndPointAddress,
+          REDIS_PORT: String(redisConfig.DB_PORT),
           MAILFROM_ADDR: `ctfd@${domainConfig.DOMAIN_NAME}`,
           MAIL_SERVER: `email-smtp.${Aws.REGION}.amazonaws.com`,
           MAIL_PORT: '587',
@@ -173,11 +172,11 @@ export class ApplicationPatterns extends Construct {
       redis.elasticache_redis,
     );
 
-    endpointsForECS.forEach((endpoint) => {
+    base.httpsEndpoints.forEach((endpoint) => {
       endpoint.connections.allowFrom(ecsSecurityGroup, Port.tcp(443));
     });
 
-    smtpEndpoint.connections.allowFrom(ecsSecurityGroup, Port.tcp(587));
+    base.smtpEndpoint.connections.allowFrom(ecsSecurityGroup, Port.tcp(587));
 
     const s3PrefixList = new AwsManagedPrefixList( this, 'S3PrefixList',
       { name: `com.amazonaws.${Aws.REGION}.s3` },
@@ -213,6 +212,44 @@ export class ApplicationPatterns extends Construct {
 
     this.loadBalancedFargateService.loadBalancer.addSecurityGroup(
       albSecurityGroup,
+    );
+
+    NagSuppressions.addResourceSuppressions(
+      this.loadBalancedFargateService.service.taskDefinition,
+      [
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Allow ReadWrite for a specific bucket.',
+          appliesTo: [
+            'Action::s3:Abort*',
+            'Action::s3:DeleteObject*',
+            'Action::s3:List*',
+            'Action::s3:GetObject*',
+            'Action::s3:GetBucket*',
+            'Resource::<ApplicationPatternsCTFdBucket6E193294.Arn>/*',
+          ],
+        },
+        { id: 'AwsSolutions-ECS2', reason: 'Not needed for this project.' },
+      ],
+      true,
+    );
+    const executionRole = this.loadBalancedFargateService.service.taskDefinition.executionRole;
+    if (executionRole) {
+      NagSuppressions.addResourceSuppressions(
+        executionRole,
+        [{ id: 'AwsSolutions-IAM5', reason: 'Not needed for this project.' }],
+        true,
+      );
+    }
+
+    NagSuppressions.addResourceSuppressions(
+      this.loadBalancedFargateService.loadBalancer,
+      [{ id: 'AwsSolutions-ELB2', reason: 'Not needed for this project.' }],
+      true,
+    );
+    NagSuppressions.addResourceSuppressions(
+      ctfdSecretKey,
+      [{ id: 'AwsSolutions-SMG4', reason: 'Do not change the secret key of CTFd.' }],
     );
   }
 }

@@ -8,6 +8,7 @@ import {
   SnsAlarmActionStrategy,
   AxisPosition,
 } from 'cdk-monitoring-constructs';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 
 import { ApplicationPatterns } from './application-patterns';
@@ -28,10 +29,10 @@ export class Monitor extends Construct {
 
     const { database, redis, mail, ctfd } = props;
 
-    // const info = new Topic(this, 'Info');
-    const notice = new Topic(this, 'Notice');
-    const warn = new Topic(this, 'Warn');
-    const critical = new Topic(this, 'Critical');
+    // const info = new Topic(this, 'Info', { enforceSSL: true });
+    const notice = new Topic(this, 'Notice', { enforceSSL: true });
+    const warn = new Topic(this, 'Warn', { enforceSSL: true });
+    const critical = new Topic(this, 'Critical', { enforceSSL: true });
 
     const monitoring = new MonitoringFacade(this, 'CTFdMonitor');
 
@@ -280,5 +281,19 @@ export class Monitor extends Construct {
         },
       ],
     });
+
+    NagSuppressions.addResourceSuppressions(
+      [notice, warn, critical],
+      [
+        {
+          id: 'AwsSolutions-SNS2',
+          reason: 'It would be better to support it. Use customer-managed KMS for inter-service messaging.',
+        },
+        {
+          id: 'AwsSolutions-SNS3',
+          reason: 'use enforceSSL',
+        },
+      ],
+    );
   }
 }

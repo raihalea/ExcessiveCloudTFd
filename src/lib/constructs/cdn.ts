@@ -16,6 +16,7 @@ import { HttpOrigin, S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { ARecord, AaaaRecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Bucket, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { BasicAuth } from './basic-auth';
 import { Domain } from './utils/domain';
@@ -159,5 +160,14 @@ export class Cdn extends Construct {
       zone: ctfDomain.hostedZone,
       target: RecordTarget.fromAlias(new CloudFrontTarget(this.distribution)),
     });
+
+    NagSuppressions.addResourceSuppressions(
+      logBucket,
+      [{ id: 'AwsSolutions-S1', reason: 'Not needed for this project.' }],
+    );
+    NagSuppressions.addResourceSuppressions(
+      this.distribution,
+      [{ id: 'AwsSolutions-CFR1', reason: 'Not needed for this project.' }],
+    );
   }
 }

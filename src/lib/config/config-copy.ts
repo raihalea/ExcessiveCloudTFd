@@ -1,4 +1,4 @@
-import { Environment } from 'aws-cdk-lib';
+import { Duration, Environment } from 'aws-cdk-lib';
 
 export const awsConfig: Environment = {
   account: '123456789012',
@@ -14,13 +14,17 @@ export interface dbConfig {
   DB_USER: string;
   DB_PORT: number;
 }
-export const databaseConfig: dbConfig = {
+export interface auroraConfig extends dbConfig {
+  backtrackWindow: Duration;
+}
+export const databaseConfig: auroraConfig = {
   DB_USER: 'ctfd',
-  DB_PORT: 3306,
+  DB_PORT: 6033, // Notice default port 3306
+  backtrackWindow: Duration.hours(1),
 };
 export const redisConfig: dbConfig = {
   DB_USER: 'ctfd',
-  DB_PORT: 6379,
+  DB_PORT: 9736, // Notice default port 6379
 };
 
 // RECORD.DOMAIN_NAME

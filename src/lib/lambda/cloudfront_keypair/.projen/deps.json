@@ -20,11 +20,6 @@
       "type": "build"
     },
     {
-      "name": "constructs",
-      "version": "^10.0.0",
-      "type": "build"
-    },
-    {
       "name": "eslint-import-resolver-typescript",
       "type": "build"
     },
@@ -44,10 +39,6 @@
     {
       "name": "jest-junit",
       "version": "^15",
-      "type": "build"
-    },
-    {
-      "name": "projen",
       "type": "build"
     },
     {

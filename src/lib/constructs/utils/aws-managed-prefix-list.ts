@@ -1,6 +1,7 @@
 import { IPrefixList, PrefixList } from 'aws-cdk-lib/aws-ec2';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 
 export interface AwsManagedPrefixListProps {
@@ -44,5 +45,11 @@ export class AwsManagedPrefixList extends Construct {
     }).getResponseField('PrefixLists.0.PrefixListId');
 
     this.prefixList = PrefixList.fromPrefixListId(this, 'PrefixList', prefixListId);
+
+    NagSuppressions.addResourceSuppressions(
+      this,
+      [{ id: 'AwsSolutions-IAM5', reason: 'Uncontrollable due to CDK-generated custom resource.' }],
+      true,
+    );
   }
 }

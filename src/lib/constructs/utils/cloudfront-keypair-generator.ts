@@ -6,6 +6,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StringParameter, IStringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Provider } from 'aws-cdk-lib/custom-resources';
+import { NagSuppressions } from 'cdk-nag';
 
 import { Construct } from 'constructs';
 
@@ -36,7 +37,7 @@ export class CloudFrontKeyPairGenerator extends Construct {
         entry: './src/lib/lambda/cloudfront_keypair/src/lambda_function.ts',
         depsLockFilePath: './package-lock.json',
         handler: 'handler',
-        runtime: Runtime.NODEJS_18_X,
+        runtime: Runtime.NODEJS_20_X,
         environment: {
           PRIVATEKEY_PARAMETER: this.privateKeyParameter.parameterName,
           PUBLICKEY_PARAMETER: publicKeyParamter.parameterName,
@@ -81,5 +82,25 @@ export class CloudFrontKeyPairGenerator extends Construct {
         cloudFrontKeyPairCustomResource.getAttString('PublicKeyEncoded'),
     });
     this.publicKey.node.addDependency(cloudFrontKeyPairCustomResource);
+
+    NagSuppressions.addResourceSuppressions(
+      cloudFrontKeyPairProvider,
+      [
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Uncontrollable due to CDK-generated custom resource.',
+          appliesTo: [
+            {
+              regex: '/^Resource::.*:\\*$/g',
+            },
+          ],
+        },
+        {
+          id: 'AwsSolutions-L1',
+          reason: 'Uncontrollable due to CDK-generated custom resource.',
+        },
+      ],
+      true,
+    );
   }
 }

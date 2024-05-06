@@ -43,7 +43,7 @@ export class Mail extends Construct {
       source: CloudWatchDimensionSource.EMAIL_HEADER,
     };
 
-    this.configurationSet.addEventDestination('test', {
+    this.configurationSet.addEventDestination('ConfiguratoinSet', {
       destination: EventDestination.cloudWatchDimensions([
         this.cloudWatchDimension,
       ]),

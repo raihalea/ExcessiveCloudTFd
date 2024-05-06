@@ -1,5 +1,5 @@
-import { RemovalPolicy } from 'aws-cdk-lib';
-import { Vpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { Names } from 'aws-cdk-lib';
+import { SubnetType, Port } from 'aws-cdk-lib/aws-ec2';
 import {
   DatabaseCluster,
   DatabaseClusterEngine,
@@ -8,12 +8,15 @@ import {
   ClusterInstance,
   CaCertificate,
 } from 'aws-cdk-lib/aws-rds';
+import { HostedRotation } from 'aws-cdk-lib/aws-secretsmanager';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { Base } from './base';
 import { NoOutboundTrafficSecurityGroup } from './utils/default-security-group';
 import { databaseConfig } from '../config/config';
 
 export interface DatabaseProps {
-  readonly vpc: Vpc;
+  readonly base: Base;
 }
 
 export class Database extends Construct {
@@ -23,12 +26,12 @@ export class Database extends Construct {
   constructor(scope: Construct, id: string, props: DatabaseProps) {
     super(scope, id);
 
-    const { vpc } = props;
+    const { base } = props;
 
     this.DB_USERNAME = databaseConfig.DB_USER;
 
     const dbClusterSecurityGroup = new NoOutboundTrafficSecurityGroup(
-      this, 'DbSecurityGroup', { vpc },
+      this, 'DbSecurityGroup', { vpc: base.vpc },
     );
 
     this.dbCluster = new DatabaseCluster(this, 'Db', {
@@ -48,13 +51,51 @@ export class Database extends Construct {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_ISOLATED,
       },
-      vpc,
+      vpc: base.vpc,
       securityGroups: [dbClusterSecurityGroup],
       port: databaseConfig.DB_PORT,
       serverlessV2MaxCapacity: 32,
       serverlessV2MinCapacity: 0.5,
       storageEncrypted: true,
-      removalPolicy: RemovalPolicy.DESTROY,
+      backtrackWindow: databaseConfig.backtrackWindow,
     });
+
+
+    const hostedRotation = HostedRotation.mysqlSingleUser(
+      {
+        functionName: `DbSecretRotation-${Names.uniqueResourceName(this, {})}`,
+        vpc: base.vpc,
+        vpcSubnets: {
+          subnetType: SubnetType.PRIVATE_ISOLATED,
+        },
+        securityGroups: [
+          new NoOutboundTrafficSecurityGroup(
+            this, 'DbRotationLambda', { vpc: base.vpc },
+          ),
+        ],
+      },
+    );
+    this.dbCluster.secret?.addRotationSchedule('Rotation', {
+      hostedRotation: hostedRotation,
+    });
+
+    const secretsManagerEndpoint = base.httpsEndpoints.find(endpoint => endpoint.node.id === 'SecretsManagerEndpoint');
+    if (secretsManagerEndpoint) {
+      secretsManagerEndpoint.connections.allowFrom(hostedRotation, Port.tcp(443));
+    }
+
+    NagSuppressions.addResourceSuppressions(
+      this.dbCluster,
+      [
+        {
+          id: 'AwsSolutions-RDS6',
+          reason: 'CTFd cannot interact with iam resource',
+        },
+        {
+          id: 'AwsSolutions-RDS10',
+          reason: 'for RDS to ensure removal with CFn',
+        },
+      ],
+    );
   }
 }

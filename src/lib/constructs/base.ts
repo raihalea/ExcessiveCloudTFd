@@ -6,11 +6,11 @@ import {
   InterfaceVpcEndpoint,
 } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
-
+import { NoOutboundTrafficSecurityGroup } from './utils/default-security-group';
 
 export class Base extends Construct {
   readonly vpc: Vpc;
-  readonly endpointsForECS: InterfaceVpcEndpoint[];
+  readonly httpsEndpoints: InterfaceVpcEndpoint[];
   readonly smtpEndpoint: InterfaceVpcEndpoint;
 
   constructor(scope: Construct, id: string) {
@@ -25,39 +25,54 @@ export class Base extends Construct {
     this.smtpEndpoint = this.vpc.addInterfaceEndpoint('SesEndpoint', {
       service: InterfaceVpcEndpointAwsService.EMAIL_SMTP,
       lookupSupportedAzs: true,
+      securityGroups: [new NoOutboundTrafficSecurityGroup(
+        this, 'SmtpSG', { vpc: this.vpc },
+      )],
     });
 
-    const endpointOptionsForECS: {[name: string]: InterfaceVpcEndpointOptions} = {
+    const httpsEndpointOptions: {[name: string]: InterfaceVpcEndpointOptions} = {
       EcrEndpoint: {
         service: InterfaceVpcEndpointAwsService.ECR,
-        // subnets: {subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}
+        securityGroups: [new NoOutboundTrafficSecurityGroup(
+          this, 'EcrSG', { vpc: this.vpc },
+        )],
       },
       EcrdkrEndpoint: {
         service: InterfaceVpcEndpointAwsService.ECR_DOCKER,
-        // subnets: {subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}
+        securityGroups: [new NoOutboundTrafficSecurityGroup(
+          this, 'EcrDkrSG', { vpc: this.vpc },
+        )],
       },
       LogsEndpoint: {
         service: InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
-        // subnets: {subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}
+        securityGroups: [new NoOutboundTrafficSecurityGroup(
+          this, 'LogsSG', { vpc: this.vpc },
+        )],
       },
       SsmEndpoint: {
         service: InterfaceVpcEndpointAwsService.SSM,
-        // subnets: {subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}
+        securityGroups: [new NoOutboundTrafficSecurityGroup(
+          this, 'SsmSG', { vpc: this.vpc },
+        )],
       },
       SsmMessagesEndpoint: {
         service: InterfaceVpcEndpointAwsService.SSM_MESSAGES,
-        // subnets: {subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}
+        securityGroups: [new NoOutboundTrafficSecurityGroup(
+          this, 'SsmMessageSG', { vpc: this.vpc },
+        )],
       },
       SecretsManagerEndpoint: {
         service: InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
-        // subnets: {subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}
+        securityGroups: [new NoOutboundTrafficSecurityGroup(
+          this, 'SecretsManagerSG', { vpc: this.vpc },
+        )],
       },
     };
 
-    this.endpointsForECS = [];
-    for (const [name, options] of Object.entries(endpointOptionsForECS)) {
+    this.httpsEndpoints = [];
+    for (const [name, options] of Object.entries(httpsEndpointOptions)) {
       const endpoint = this.vpc.addInterfaceEndpoint(name, options);
-      this.endpointsForECS.push(endpoint);
+      this.httpsEndpoints.push(endpoint);
     }
   }
 }
