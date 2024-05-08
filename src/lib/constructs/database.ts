@@ -83,6 +83,7 @@ export class Database extends Construct {
     if (secretsManagerEndpoint) {
       secretsManagerEndpoint.connections.allowFrom(hostedRotation, Port.tcp(443));
     }
+    this.dbCluster.connections.allowFrom(hostedRotation, Port.tcp(databaseConfig.DB_PORT));
 
     NagSuppressions.addResourceSuppressions(
       this.dbCluster,
