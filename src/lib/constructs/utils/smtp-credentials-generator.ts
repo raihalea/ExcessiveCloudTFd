@@ -55,6 +55,7 @@ export class SmtpCredentialsGenerator extends Construct {
     });
 
     this.smtpSecretAccessKey.grantWrite(onEvent);
+    this.smtpSecretAccessKey.grantRead(onEvent);
 
     const expirationTime = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
     onEvent.addToRolePolicy(new PolicyStatement({

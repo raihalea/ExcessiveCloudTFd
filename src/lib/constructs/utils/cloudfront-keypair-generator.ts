@@ -49,6 +49,7 @@ export class CloudFrontKeyPairGenerator extends Construct {
     );
 
     publicKeyParamter.grantWrite(onEvent);
+    this.privateKeyParameter.grantRead(onEvent);
 
     const expirationTime = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
     onEvent.addToRolePolicy(new PolicyStatement({
