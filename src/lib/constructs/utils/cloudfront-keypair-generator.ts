@@ -1,6 +1,7 @@
 import { CustomResource, Duration, Names } from 'aws-cdk-lib';
 import { PublicKey } from 'aws-cdk-lib/aws-cloudfront';
 import { KeyPair, KeyPairType, KeyPairFormat } from 'aws-cdk-lib/aws-ec2';
+import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -49,16 +50,15 @@ export class CloudFrontKeyPairGenerator extends Construct {
 
     publicKeyParamter.grantWrite(onEvent);
 
-    const now = new Date();
-    const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-    this.privateKeyParameter.grantRead(onEvent).principalStatements.forEach((statement) => {
-      statement.addConditions(
-        {
-          DateGreaterThan: { 'aws:CurrentTime': now.toISOString() },
-          DateLessThan: { 'aws:CurrentTime': threeHoursLater.toISOString() },
-        },
-      );
-    });
+    const expirationTime = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
+    onEvent.addToRolePolicy(new PolicyStatement({
+      effect: Effect.DENY,
+      actions: ['*'],
+      resources: ['*'],
+      conditions: {
+        DateGreaterThan: { 'aws:CurrentTime': expirationTime },
+      },
+    }));
 
     const cloudFrontKeyPairProvider = new Provider(
       this,
