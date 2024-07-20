@@ -39,6 +39,7 @@ The AWS CDK stack provisions the following resources (this list is not exhaustiv
     - AWS WAF
     - AWS Secrets Manager
     - Amazon CloudWatch Dashboards
+    - AWS IAM
 - Compute
     - AWS Lambda
 
