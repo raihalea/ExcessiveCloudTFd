@@ -130,6 +130,17 @@ This will create all the necessary AWS resources and output the URL where your C
 | `wafConfig`                  | `limitRequestsRule`      | `isEnabled`             | Enable or disable limiting requests rule.                    |
 | `wafConfig`                  | `managedRules`           | `isEnabled`             | Enable or disable managed rules.                             |
 
+## Monitoring
+
+The monitoring setup includes:
+
+- **Amazon CloudWatch Dashboards**: Provides a visual representation of various metrics.
+  ![CloudWatch Dashboard](cw_dashboards.png)
+- **Amazon SNS**: Sends notifications based on:
+  - **CloudWatch Metrics and Alarms**: Monitors the application and triggers alarms based on specified thresholds.
+  - **MetricFilter for Containers**: Monitors container logs and triggers SNS notifications based on specific log patterns.
+
+SNS notifications can be sent to various endpoints, including email and Slack.
 
 ## Clean Up
 
