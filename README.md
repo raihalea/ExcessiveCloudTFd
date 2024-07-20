@@ -17,14 +17,30 @@ This repository provides a template to deploy [CTFd](https://github.com/CTFd/CTF
 
 ## Architecture
 
-The AWS CDK stack provisions the following resources:
+The AWS CDK stack provisions the following resources (this list is not exhaustive):
 
-- Amazon ECS Cluster
-- AWS Fargate service to run the CTFd containers
-- Amazon RDS for the database backend
-- Amazon S3 for static file storage
-- Amazon CloudFront for CDN
-- Amazon Route 53
+- Containers
+    - Amazon ECS
+    - Amazon ECR
+    - AWS Fargate
+- Database
+    - Amazon Aurora Serverless v2(MySQL)
+    - Amazon ElastiCache(Redis)
+- Strage
+    - Amazon S3
+- Network & Content Delivery
+    - Amazon CloudFront
+    - Amazon Route 53
+    - Amazon VPC
+    - Elastic Load Balancing(ALB)
+- Security, Identity & Compliance
+    - Amazon SES
+    - Amazon SNS
+    - AWS WAF
+    - AWS Secrets Manager
+    - Amazon CloudWatch Dashboards
+- Compute
+    - AWS Lambda
 
 ![Architecture Diagram](./architecture.drawio.svg)
 
@@ -114,7 +130,6 @@ This will create all the necessary AWS resources and output the URL where your C
 | `wafConfig`                  | `managedRules`           | `isEnabled`             | Enable or disable managed rules.                             |
 
 
-
 ## Clean Up
 
 To remove the deployed resources, run:
@@ -122,12 +137,6 @@ To remove the deployed resources, run:
 ```bash
 cdk destroy --all
 ```
-
-Ensure you delete any additional resources that were created outside of this stack manually, such as S3 buckets or RDS instances.
-
-## Contributing
-
-We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for more details.
 
 ## License
 
