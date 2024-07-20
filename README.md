@@ -199,6 +199,7 @@ graph TD;
     DEFAULT_ACTION --> ALLOW[Allow Request]
     TIP -->|Matched| ALLOW
 ```
+> **Note:** The diagram is a simplified representation and may not capture all the intricacies of the actual AWS WAF rules.
 
 ## Clean Up
 
