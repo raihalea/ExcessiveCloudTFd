@@ -110,8 +110,8 @@ export class Waf extends Construct {
     }
 
     // Rate Based Rule
-    if (wafConfig.limitRequestsRule.isEnabled) {
-      const limitRequestsRule = this.createRuleLimitRequests(rules.length);
+    const limitRequestsRule = this.createRuleLimitRequests(rules.length, wafConfig.limitRequestsRule.rateByIp);
+    if (limitRequestsRule) {
       rules.push(limitRequestsRule);
     }
 
@@ -134,22 +134,20 @@ export class Waf extends Construct {
     }
 
     // Geo Based Rule
-    if (wafConfig.geoMatchRule.isEnabled) {
-      const geoMatchRule = this.createRuleGeoMatch(rules.length);
+    const geoMatchRule = this.createRuleBlockOutsideAllowedCountries(rules.length, wafConfig.geoMatchRule.allowCountries);
+    if (geoMatchRule) {
       rules.push(geoMatchRule);
     }
 
     // AWS ManagedRules
-    if (wafConfig.managedRules.isEnabled) {
-      const managedRuleGroups = this.createManagedRules(rules.length);
-      rules.push(...managedRuleGroups);
+    const managedRuleGroups = this.createManagedRules(rules.length);
+    rules.push(...managedRuleGroups);
 
-      const XsslabelMatchRule = this.createXSSLabelMatch(
-        rules.length,
-        ipSetsDict.adminIpsSetList.ipSetList,
-      );
-      rules.push(XsslabelMatchRule);
-    }
+    const XsslabelMatchRule = this.createXSSLabelMatch(
+      rules.length,
+      ipSetsDict.adminIpsSetList.ipSetList,
+    );
+    rules.push(XsslabelMatchRule);
 
     return rules;
   }
@@ -196,12 +194,16 @@ export class Waf extends Construct {
     );
   }
 
-  private createRuleLimitRequests(priority: number): CfnRuleGroup.RuleProperty {
-    return WafStatements.block(
-      'LimitRequests',
-      priority,
-      WafStatements.rateBasedByIp(1000),
-    );
+  private createRuleLimitRequests( priority: number, rateByIp?: number ): CfnRuleGroup.RuleProperty | undefined {
+    if (!rateByIp) {
+      return undefined;
+    } else {
+      return WafStatements.block(
+        'RateLimitRequests',
+        priority,
+        WafStatements.rateBasedByIp(rateByIp),
+      );
+    }
   }
 
   private createRuleBlockNonSpecificIps(
@@ -217,12 +219,19 @@ export class Waf extends Construct {
     );
   }
 
-  private createRuleGeoMatch(priority: number): CfnRuleGroup.RuleProperty {
-    return WafStatements.block(
-      'GeoMatch',
-      priority,
-      WafStatements.not(WafStatements.matchCountryCodes(['JP'])),
-    );
+  private createRuleBlockOutsideAllowedCountries(
+    priority: number,
+    countryCodes?: string[],
+  ): CfnRuleGroup.RuleProperty | undefined {
+    if (!countryCodes) {
+      return undefined;
+    } else {
+      return WafStatements.block(
+        'BlockOutsideAllowedCountries',
+        priority,
+        WafStatements.not(WafStatements.matchCountryCodes(countryCodes)),
+      );
+    }
   }
 
   private createXSSLabelMatch(

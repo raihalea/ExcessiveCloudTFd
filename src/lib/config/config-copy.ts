@@ -50,11 +50,10 @@ export const basicAuthConfig = {
 interface WafConfig {
   isEnabled: boolean;
   emergencyTrustedIpsRule: RuleEnableWithIpConfig;
-  limitRequestsRule: RuleEnableConfig;
+  limitRequestsRule: limitRateRequestsRuleConfig;
   adminIpsRule: RuleEnableWithIpConfig;
   blockNonSpecificIpsRule: RuleEnableWithIpConfig;
-  geoMatchRule: RuleEnableConfig;
-  managedRules: RuleEnableConfig;
+  geoMatchRule: GeoMatchRuleConfig;
 }
 interface RuleEnableWithIpConfig extends RuleEnableConfig {
   IPv4List: string[];
@@ -67,6 +66,13 @@ interface RuleEnableWithIpConfig extends RuleEnableConfig {
 interface RuleEnableConfig {
   isEnabled: boolean;
 }
+interface GeoMatchRuleConfig {
+  allowCountries?: string[];
+}
+interface limitRateRequestsRuleConfig {
+  rateByIp?: number;
+}
+
 export const wafConfig: WafConfig = {
   isEnabled: true,
   emergencyTrustedIpsRule: {
@@ -100,12 +106,9 @@ export const wafConfig: WafConfig = {
     ],
   },
   geoMatchRule: {
-    isEnabled: true,
+    allowCountries: ['JP', 'US'],
   },
   limitRequestsRule: {
-    isEnabled: true,
-  },
-  managedRules: {
-    isEnabled: true,
+    rateByIp: 1000,
   },
 };
