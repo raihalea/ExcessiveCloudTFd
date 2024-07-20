@@ -153,6 +153,53 @@ The monitoring setup includes:
 
 SNS notifications can be sent to various endpoints, including email and Slack.
 
+## WAF Rules
+
+### Rule Details
+1. Check Emergency Trusted IPs: Checks if the traffic is from trusted IPs and allows the request if matched.
+1. Check Rate Limit: Checks the number of requests per IP and blocks the request if the limit is exceeded.
+1. Check Admin IPs and Specific Path: Checks if the admin IP list exists and verifies admin IPs. If not matched, checks specific paths (e.g., /api/ or /setup).
+1. Check Specific IPs: Checks if the specific IP list exists and verifies specific IPs. If not matched, proceeds to check Geo IPs.
+1. Check Geo IPs: Checks the origin country of the traffic and blocks the request if from a disallowed country.
+1. Check AWS Managed Rules: Inspects traffic based on AWS managed rules and blocks the request if matched.
+1. Check Label and Specific Path: Checks specific labels and paths (e.g., /api/ or /setup) and blocks the request if matched.
+1. Default Action: The final action is to allow the request.
+
+This diagram illustrates how traffic is inspected by AWS WAF.
+```mermaid
+graph TD;
+    Start[Start] --> TIP[Check Emergency Trusted IPs]
+    TIP -->|Not Matched| CRL[Check Rate Limit]
+    CRL -->|Not Exceeded| CSP[Check Specific Path]
+    CRL -->|Exceeded| BLOCK[Block Request]
+    subgraph Check Admin IPs and Specific Path:'/api' or '/setup'
+    CSP -->|Specific Path| AIE[Admin IPs List Exists?]
+    AIE -->|Exists| CAI[Check Admin IP]
+    end
+    CAI -->|Matched| SPE[Specific IPs List Exists?]
+    AIE -->|Not Exists| SPE
+    CAI -->|Not Matched| BLOCK
+    subgraph Check Specific IPs
+    SPE -->|Exists| CSI[Check Specific IP]
+    CSP -->|Not Specific Path| SPE
+    end
+    subgraph Check Geo IPs
+    CSI -->|Matched| GLE[Geo IPs List Exists?]
+    SPE -->|Not Exists| GLE
+    GLE -->|Exists| CGI[Check Geo IP]
+    end
+    CSI -->|Not Matched| BLOCK
+    CGI -->|Matched| CAMR[Check AWS Managed Rules]
+    CGI -->|Not Matched| BLOCK
+    GLE -->|Not Exists| CAMR
+    CAMR -->|Matched| BLOCK
+    CAMR -->|Not Matched| CLS[Check Label and Specific Path:'/api' or '/setup']
+    CLS -->|Matched| BLOCK
+    CLS -->|Not Matched| DEFAULT_ACTION
+    DEFAULT_ACTION --> ALLOW[Allow Request]
+    TIP -->|Matched| ALLOW
+```
+
 ## Clean Up
 
 To remove the deployed resources, run:
