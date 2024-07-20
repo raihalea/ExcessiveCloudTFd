@@ -1,8 +1,19 @@
+### ⚠️ Note: This repository contains experimental code and is not recommended for production use. Use at your own risk.
+
 # ExcessiveCloudTFd
 
 This repository provides a template to deploy [CTFd](https://github.com/CTFd/CTFd) on AWS using the AWS Cloud Development Kit (CDK). CTFd is a Capture The Flag (CTF) framework, which can be used to deploy CTF challenges.
 
-**⚠️ Note: This repository contains experimental code and is not recommended for production use. Use at your own risk.**
+## Features Enabled
+
+The following features are enabled by deploying CTFd using AWS CDK:
+
+- **Hosting**: CTFd is hosted in containers managed by Amazon ECS and AWS Fargate.
+- **Data Persistence**: Data persistence with Aurora Serverless and S3.
+- **Auto Scaling**:  Auto-scaling for ECS and Aurora Serverless (ElastiCache does not auto-scale).
+- **Email Sending**: Email sending from CTFd using SES.
+- **Security**: Protection with WAF, with relaxed protection for specific IPs.
+- **CDN Caching**: CDN caching of themes and S3 objects (via CTFd plugin).
 
 ## Table of Contents
 
@@ -41,7 +52,7 @@ The AWS CDK stack provisions the following resources (this list is not exhaustiv
     - Amazon CloudWatch Dashboards
     - AWS IAM
 - Compute
-    - AWS Lambda
+    - AWS Lambda (CloudFormation Custom Resource)
 
 ![Architecture Diagram](./architecture.drawio.svg)
 
