@@ -109,16 +109,16 @@ This will create all the necessary AWS resources and output the URL where your C
 
 | Variable        | Key            | Description                                                                                   |
 |-----------------|----------------|-----------------------------------------------------------------------------------------------|
-| `awsConfig`     | `account`      | AWS account ID where CTFd containers are deployed.                                            |
+| `awsConfig`     | `account`      | (Change Required) AWS account ID where CTFd containers are deployed.                                            |
 | `awsConfig`     | `region`       | AWS region where CTFd containers are deployed.                                                |
-| `globalConfig`  | `account`      | AWS account ID for global resources like CloudFront and WAF.                                  |
+| `globalConfig`  | `account`      | (Change Required) AWS account ID for global resources like CloudFront and WAF.                                  |
 | `globalConfig`  | `region`       | AWS region for global resources like CloudFront and WAF. Fixed to `us-east-1`.                |
 | `databaseConfig`| `DB_USER`      | Database user name for Aurora database.                                                       |
 | `databaseConfig`| `DB_PORT`      | Database port for Aurora database.                                                            |
 | `databaseConfig`| `backtrackWindow` | Duration for backtrack window in Aurora database.                                           |
 | `redisConfig`   | `DB_USER`      | Redis user name.                                                                              |
 | `redisConfig`   | `DB_PORT`      | Redis port.                                                                                   |
-| `domainConfig`  | `DOMAIN_NAME`  | Domain name for CTFd instance.                                                                |
+| `domainConfig`  | `DOMAIN_NAME`  | (Change Required) Domain name for CTFd instance.                                                                |
 | `domainConfig`  | `HOSTNAME`     | Hostname for the CTFd instance.                                                               |
 | `domainConfig`  | `ALB_HOSTNAME` | Hostname for the Application Load Balancer.                                                   |
 | `domainConfig`  | `MAIL`         | Mail domain for CTFd instance.                                                                |
