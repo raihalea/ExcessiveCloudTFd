@@ -13,7 +13,8 @@ The following features are enabled by deploying CTFd using AWS CDK:
 - **Auto Scaling**:  Auto-scaling for ECS and Aurora Serverless (ElastiCache does not auto-scale).
 - **Email Sending**: Email sending from CTFd using SES.
 - **Security**: Protection with WAF, with relaxed protection for specific IPs.
-- **CDN Caching**: CDN caching of themes and S3 objects (via CTFd plugin).
+- **CDN Caching**: CDN caching of themes and S3 objects.
+- **Signed URLs**: CloudFront and S3 serve objects using signed URLs for enhanced security. (via CTFd plugin)
 
 ## Table of Contents
 
