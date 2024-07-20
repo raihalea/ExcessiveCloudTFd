@@ -165,7 +165,6 @@ SNS notifications can be sent to various endpoints, including email and Slack.
 1. Check Label and Specific Path: Checks specific labels and paths (e.g., /api/ or /setup) and blocks the request if matched.
 1. Default Action: The final action is to allow the request.
 
-This diagram illustrates how traffic is inspected by AWS WAF.
 ```mermaid
 graph TD;
     Start[Start] --> TIP[Check Emergency Trusted IPs]
@@ -199,7 +198,7 @@ graph TD;
     DEFAULT_ACTION --> ALLOW[Allow Request]
     TIP -->|Matched| ALLOW
 ```
-> **Note:** The diagram is a simplified representation and may not capture all the intricacies of the actual AWS WAF rules.
+**Note:** The diagram is a simplified representation and may not capture all the intricacies of the actual AWS WAF rules.
 
 ## Clean Up
 
